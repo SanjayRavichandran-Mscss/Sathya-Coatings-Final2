@@ -69,7 +69,7 @@
 //     const fetchCompanies = async () => {
 //       try {
 //         setLoading((p) => ({ ...p, companies: true }));
-//         const response = await axios.get("http://localhost:5000/admin/companies");
+//         const response = await axios.get("http://103.118.158.33/api/admin/companies");
 //         const companiesData = response.data.data || [];
 //         setCompanies(companiesData);
 //         if (companiesData.length > 0) {
@@ -90,7 +90,7 @@
 //       const fetchProjects = async () => {
 //         try {
 //           setLoading((p) => ({ ...p, projects: true }));
-//           const response = await axios.get(`http://localhost:5000/admin/projects/${selectedCompany.value}`);
+//           const response = await axios.get(`http://103.118.158.33/api/admin/projects/${selectedCompany.value}`);
 //           const projectsData = response.data.data || [];
 //           setProjects(projectsData);
 //           if (projectsData.length > 0) {
@@ -121,7 +121,7 @@
 //       const fetchSites = async () => {
 //         try {
 //           setLoading((p) => ({ ...p, sites: true }));
-//           const response = await axios.get(`http://localhost:5000/admin/sites/${selectedProject.value}`);
+//           const response = await axios.get(`http://103.118.158.33/api/admin/sites/${selectedProject.value}`);
 //           const sitesData = response.data.data || [];
 //           setSites(sitesData);
 //           if (sitesData.length > 0) {
@@ -151,8 +151,8 @@
 //         try {
 //           setLoading((p) => ({ ...p, completionEntries: true, poTotals: true }));
 //           const [completionResponse, poTotalsResponse] = await Promise.all([
-//             axios.get(`http://localhost:5000/admin/completion-entries-by-site/${selectedSite.value}`),
-//             axios.get(`http://localhost:5000/admin/po-reckoner-totals/${selectedSite.value}`),
+//             axios.get(`http://103.118.158.33/api/admin/completion-entries-by-site/${selectedSite.value}`),
+//             axios.get(`http://103.118.158.33/api/admin/po-reckoner-totals/${selectedSite.value}`),
 //           ]);
 //           setCompletionEntries(completionResponse.data.data || []);
 //           const poData = poTotalsResponse.data.data || null;
@@ -801,7 +801,7 @@ const Dashboard = () => {
       try {
         setLoading((p) => ({ ...p, companies: true }));
         setError(null);
-        const response = await axios.get("http://localhost:5000/admin/companies");
+        const response = await axios.get("http://103.118.158.33/api/admin/companies");
         const companiesData = response.data.data || [];
         setCompanies(companiesData);
         if (companiesData.length > 0) {
@@ -824,7 +824,7 @@ const Dashboard = () => {
         try {
           setLoading((p) => ({ ...p, projects: true }));
           setError(null);
-          const response = await axios.get(`http://localhost:5000/admin/projects/${selectedCompany.value}`);
+          const response = await axios.get(`http://103.118.158.33/api/admin/projects/${selectedCompany.value}`);
           const projectsData = response.data.data || [];
           setProjects(projectsData);
           if (projectsData.length > 0) {
@@ -861,7 +861,7 @@ const Dashboard = () => {
         try {
           setLoading((p) => ({ ...p, sites: true }));
           setError(null);
-          const response = await axios.get(`http://localhost:5000/admin/sites/${selectedProject.value}`);
+          const response = await axios.get(`http://103.118.158.33/api/admin/sites/${selectedProject.value}`);
           const sitesData = response.data.data || [];
           setSites(sitesData);
           if (sitesData.length > 0) {
@@ -896,7 +896,7 @@ const Dashboard = () => {
         try {
           setLoading((p) => ({ ...p, workDescriptions: true }));
           setError(null);
-          const response = await axios.get(`http://localhost:5000/admin/work-descriptions/${selectedSite.value}/${selectedCategory.value}`);
+          const response = await axios.get(`http://103.118.158.33/api/admin/work-descriptions/${selectedSite.value}/${selectedCategory.value}`);
           const descriptionsData = response.data.data || [];
           setWorkDescriptions(descriptionsData);
           setSelectedDescription(null);
@@ -923,9 +923,9 @@ const Dashboard = () => {
           setLoading((p) => ({ ...p, completionEntries: true, poTotals: true, expenseDetails: true }));
           setError(null);
           const [completionResponse, poTotalsResponse, expenseResponse] = await Promise.all([
-            axios.get(`http://localhost:5000/admin/completion-entries-by-site/${selectedSite.value}`),
-            axios.get(`http://localhost:5000/admin/po-reckoner-totals/${selectedSite.value}`),
-            axios.get(`http://localhost:5000/admin/expense-details/${selectedSite.value}`)
+            axios.get(`http://103.118.158.33/api/admin/completion-entries-by-site/${selectedSite.value}`),
+            axios.get(`http://103.118.158.33/api/admin/po-reckoner-totals/${selectedSite.value}`),
+            axios.get(`http://103.118.158.33/api/admin/expense-details/${selectedSite.value}`)
           ]);
           const completionData = completionResponse.data.data || [];
           setCompletionEntries(completionData);

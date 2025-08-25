@@ -89,7 +89,7 @@ const DisplayReckoner = () => {
   const fetchSites = async () => {
     try {
       setLoadingSites(true);
-      const res = await axios.get("http://localhost:5000/reckoner/sites");
+      const res = await axios.get("http://103.118.158.33/api/reckoner/sites");
       if (res.data.success) {
         const options = res.data.data.map((site) => ({
           po_number: site.po_number,
@@ -130,7 +130,7 @@ const DisplayReckoner = () => {
   const fetchSiteInfo = async (poNumber) => {
     try {
       setLoadingSite(true);
-      const res = await axios.get(`http://localhost:5000/reckoner/sites/${poNumber}`);
+      const res = await axios.get(`http://103.118.158.33/api/reckoner/sites/${poNumber}`);
       if (res.data.success) {
         setSiteInfo(res.data.data);
         setSelectedSiteDetails({
@@ -183,7 +183,7 @@ const DisplayReckoner = () => {
   const fetchReckonerData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/reckoner/reckoner/");
+      const res = await axios.get("http://103.118.158.33/api/reckoner/reckoner/");
       const data = res.data.success ? res.data.data : [];
       const updatedData = data.map((item) => {
         const completedQty = parseFloat(item.area_completed) || 0;
@@ -329,7 +329,7 @@ const DisplayReckoner = () => {
         billing_status: "Not Billed", // Default value, adjust if needed
         created_by: createdBy, // Include decoded created_by
       };
-      await axios.put(`http://localhost:5000/reckoner/completion_status/${rec_id}`, payload);
+      await axios.put(`http://103.118.158.33/api/reckoner/completion_status/${rec_id}`, payload);
       showAlert("success", "Data updated successfully");
       await fetchReckonerData();
       setEditingId(null);

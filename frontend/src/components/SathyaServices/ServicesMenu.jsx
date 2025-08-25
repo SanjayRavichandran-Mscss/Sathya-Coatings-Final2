@@ -85,7 +85,7 @@
 
 //     const handleLogout = async () => {
 //       try {
-//         await axios.post("http://localhost:5000/auth/logout");
+//         await axios.post("http://103.118.158.33/api/auth/logout");
 //         localStorage.removeItem("token");
 //         localStorage.removeItem("encodedUserId");
 //         localStorage.removeItem("loginTime");
@@ -190,7 +190,7 @@
 //   const renderMobileMenu = () => {
 //     const handleLogout = async () => {
 //       try {
-//         await axios.post("http://localhost:5000/auth/logout");
+//         await axios.post("http://103.118.158.33/api/auth/logout");
 //         localStorage.removeItem("token");
 //         localStorage.removeItem("encodedUserId");
 //         localStorage.removeItem("loginTime");
@@ -374,7 +374,7 @@ const ServiceMenu = ({ onMenuSelect, activeMenu = "dashboard" }) => {
 
     const handleLogout = async () => {
       try {
-        await axios.post("http://localhost:5000/auth/logout");
+        await axios.post("http://103.118.158.33/api/auth/logout");
         localStorage.removeItem("token");
         localStorage.removeItem("encodedUserId");
         localStorage.removeItem("loginTime");
@@ -479,7 +479,7 @@ const ServiceMenu = ({ onMenuSelect, activeMenu = "dashboard" }) => {
   const renderMobileMenu = () => {
     const handleLogout = async () => {
       try {
-        await axios.post("http://localhost:5000/auth/logout");
+        await axios.post("http://103.118.158.33/api/auth/logout");
         localStorage.removeItem("token");
         localStorage.removeItem("encodedUserId");
         localStorage.removeItem("loginTime");

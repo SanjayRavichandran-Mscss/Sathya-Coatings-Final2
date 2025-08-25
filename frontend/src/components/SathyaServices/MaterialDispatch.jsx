@@ -35,7 +35,7 @@ const MaterialDispatch = () => {
   const fetchProjects = async () => {
     try {
       setLoading((prev) => ({ ...prev, projects: true }));
-      const response = await axios.get("http://localhost:5000/material/projects");
+      const response = await axios.get("http://103.118.158.33/api/material/projects");
       setProjects(response.data.data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -49,7 +49,7 @@ const MaterialDispatch = () => {
   const fetchSites = async (pd_id) => {
     try {
       setLoading((prev) => ({ ...prev, sites: true }));
-      const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
+      const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
       setSites(response.data.data || []);
     } catch (error) {
       console.error("Error fetching sites:", error);
@@ -64,7 +64,7 @@ const MaterialDispatch = () => {
   const fetchMaterials = async () => {
     try {
       setLoading((prev) => ({ ...prev, materials: true }));
-      const response = await axios.get("http://localhost:5000/material/materials");
+      const response = await axios.get("http://103.118.158.33/api/material/materials");
       setMaterials(response.data.data || []);
     } catch (error) {
       console.error("Error fetching materials:", error);
@@ -78,7 +78,7 @@ const MaterialDispatch = () => {
   const fetchUoms = async () => {
     try {
       setLoading((prev) => ({ ...prev, uoms: true }));
-      const response = await axios.get("http://localhost:5000/material/uom");
+      const response = await axios.get("http://103.118.158.33/api/material/uom");
       setUoms(response.data.data || []);
     } catch (error) {
       console.error("Error fetching UOMs:", error);
@@ -93,7 +93,7 @@ const MaterialDispatch = () => {
     try {
       setLoading((prev) => ({ ...prev, assignments: true }));
       const response = await axios.get(
-        `http://localhost:5000/material/assignments?pd_id=${pd_id}&site_id=${site_id}`
+        `http://103.118.158.33/api/material/assignments?pd_id=${pd_id}&site_id=${site_id}`
       );
       const assignments = response.data.data || [];
       const updatedRows = assignments.map((assignment) => {
@@ -274,7 +274,7 @@ const MaterialDispatch = () => {
         vendor_code: vendorCode || null,
       }));
 
-      await axios.post("http://localhost:5000/material/dispatch-material", payload);
+      await axios.post("http://103.118.158.33/api/material/dispatch-material", payload);
 
       Swal.fire({
         position: "center",

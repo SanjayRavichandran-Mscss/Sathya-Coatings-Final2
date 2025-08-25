@@ -41,7 +41,7 @@
 //   const fetchSites = async () => {
 //     try {
 //       setLoadingSites(true);
-//       const res = await axios.get("http://localhost:5000/reckoner/sites");
+//       const res = await axios.get("http://103.118.158.33/api/reckoner/sites");
 //       if (res.data.success && Array.isArray(res.data.data)) {
 //         const options = res.data.data.map((site) => ({
 //           site_id: site.site_id,
@@ -66,7 +66,7 @@
 //   const fetchReckonerData = async () => {
 //     try {
 //       setLoading(true);
-//       const res = await axios.get("http://localhost:5000/reckoner/reckoner/");
+//       const res = await axios.get("http://103.118.158.33/api/reckoner/reckoner/");
 //       const data =
 //         res.data.success && Array.isArray(res.data.data) ? res.data.data : [];
 //       const uniqueData = Array.from(
@@ -159,7 +159,7 @@
 //       };
 
 //       await axios.post(
-//         "http://localhost:5000/site-incharge/completion-status",
+//         "http://103.118.158.33/api/site-incharge/completion-status",
 //         payload
 //       );
 
@@ -413,7 +413,7 @@ const WorkCompletionEntry = () => {
   const fetchSites = async () => {
     try {
       setLoadingSites(true);
-      const res = await axios.get("http://localhost:5000/reckoner/sites");
+      const res = await axios.get("http://103.118.158.33/api/reckoner/sites");
       if (res.data.success && Array.isArray(res.data.data)) {
         const options = res.data.data.map((site) => ({
           site_id: site.site_id,
@@ -438,7 +438,7 @@ const WorkCompletionEntry = () => {
   const fetchReckonerData = async () => {
     try {
       setLoading(true);
-      const res = await axios.get("http://localhost:5000/reckoner/reckoner/");
+      const res = await axios.get("http://103.118.158.33/api/reckoner/reckoner/");
       const data =
         res.data.success && Array.isArray(res.data.data) ? res.data.data : [];
       const uniqueData = Array.from(
@@ -459,7 +459,7 @@ const WorkCompletionEntry = () => {
 
   const fetchHistoryData = async (rec_id) => {
     try {
-      const res = await axios.get("http://localhost:5000/site-incharge/completion-entries", {
+      const res = await axios.get("http://103.118.158.33/api/site-incharge/completion-entries", {
         params: { rec_id, date: selectedDate },
       });
       if (res.data.status === 'success') {
@@ -552,7 +552,7 @@ const WorkCompletionEntry = () => {
       };
 
       await axios.post(
-        "http://localhost:5000/site-incharge/completion-status",
+        "http://103.118.158.33/api/site-incharge/completion-status",
         payload
       );
 

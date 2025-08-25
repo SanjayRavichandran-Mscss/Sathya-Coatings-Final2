@@ -31,7 +31,7 @@ const AssignSiteIncharge = () => {
   const fetchProjects = async () => {
     try {
       setLoading((prev) => ({ ...prev, projects: true }));
-      const response = await axios.get("http://localhost:5000/material/projects");
+      const response = await axios.get("http://103.118.158.33/api/material/projects");
       setProjects(response.data.data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -45,7 +45,7 @@ const AssignSiteIncharge = () => {
   const fetchSites = async (pd_id) => {
     try {
       setLoading((prev) => ({ ...prev, sites: true }));
-      const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
+      const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
       setSites(response.data.data || []);
     } catch (error) {
       console.error("Error fetching sites:", error);
@@ -60,7 +60,7 @@ const AssignSiteIncharge = () => {
   const fetchEmployees = async () => {
     try {
       setLoading((prev) => ({ ...prev, employees: true }));
-      const response = await axios.get("http://localhost:5000/material/employees");
+      const response = await axios.get("http://103.118.158.33/api/material/employees");
       setEmployees(response.data.data || []);
       if (response.data.data.length === 0) {
         setError("No employees found. Please add an employee.");
@@ -170,7 +170,7 @@ const AssignSiteIncharge = () => {
         emp_id: row.emp_id,
       }));
 
-      await axios.post("http://localhost:5000/material/assign-incharge", payload);
+      await axios.post("http://103.118.158.33/api/material/assign-incharge", payload);
 
       Swal.fire({
         position: "top-end",
