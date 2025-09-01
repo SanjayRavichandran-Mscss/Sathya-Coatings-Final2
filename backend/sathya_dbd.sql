@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.40, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
 --
 -- Host: localhost    Database: sathya_dbd
 -- ------------------------------------------------------
--- Server version	8.0.40
+-- Server version	8.0.43
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -547,6 +547,40 @@ INSERT INTO `location` VALUES ('LO001','Kanchipuram'),('LO002','Erode'),('LO003'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `material_acknowledgement`
+--
+
+DROP TABLE IF EXISTS `material_acknowledgement`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `material_acknowledgement` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `material_dispatch_id` int NOT NULL,
+  `comp_a_qty` int DEFAULT NULL,
+  `comp_b_qty` int DEFAULT NULL,
+  `comp_c_qty` int DEFAULT NULL,
+  `comp_a_remarks` varchar(255) DEFAULT NULL,
+  `comp_b_remarks` varchar(255) DEFAULT NULL,
+  `comp_c_remarks` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `material_dispatch_id` (`material_dispatch_id`),
+  CONSTRAINT `material_acknowledgement_ibfk_1` FOREIGN KEY (`material_dispatch_id`) REFERENCES `material_dispatch` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `material_acknowledgement`
+--
+
+LOCK TABLES `material_acknowledgement` WRITE;
+/*!40000 ALTER TABLE `material_acknowledgement` DISABLE KEYS */;
+INSERT INTO `material_acknowledgement` VALUES (3,1,10,20,40,'received','received','received','2025-08-29 07:04:07','2025-08-29 07:04:07');
+/*!40000 ALTER TABLE `material_acknowledgement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `material_assign`
 --
 
@@ -576,7 +610,7 @@ CREATE TABLE `material_assign` (
   CONSTRAINT `material_assign_ibfk_2` FOREIGN KEY (`site_id`) REFERENCES `site_details` (`site_id`) ON DELETE RESTRICT,
   CONSTRAINT `material_assign_ibfk_3` FOREIGN KEY (`item_id`) REFERENCES `material_master` (`item_id`) ON DELETE RESTRICT,
   CONSTRAINT `material_assign_ibfk_4` FOREIGN KEY (`uom_id`) REFERENCES `uom_master` (`uom_id`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -585,7 +619,7 @@ CREATE TABLE `material_assign` (
 
 LOCK TABLES `material_assign` WRITE;
 /*!40000 ALTER TABLE `material_assign` DISABLE KEYS */;
-INSERT INTO `material_assign` VALUES (2,'PD001','ST001','item_106',1,100,'2025-08-25 11:33:00',3,1,NULL,69),(3,'PD001','ST001','item_113',1,100,'2025-08-25 11:33:00',3,1,NULL,69),(4,'PD001','ST001','item_4',1,50,'2025-08-25 11:33:00',NULL,NULL,NULL,69),(5,'PD001','ST001','item_107',3,2400,'2025-08-25 11:33:00',5,1,NULL,69),(6,'PD001','ST001','item_108',3,250,'2025-08-25 11:33:00',NULL,NULL,NULL,69),(7,'PD001','ST001','item_109',3,1500,'2025-08-25 11:33:00',2,1,NULL,69),(8,'PD001','ST001','item_110',3,600,'2025-08-25 11:33:00',5,1,NULL,69),(9,'PD001','ST001','item_111',3,1200,'2025-08-25 11:33:00',5,1,NULL,69),(10,'PD001','ST001','item_112',4,400,'2025-08-25 11:33:00',NULL,NULL,NULL,69);
+INSERT INTO `material_assign` VALUES (1,'PD001','ST001','item_104',1,300,'2025-08-29 12:32:06',3,2,1,69),(2,'PD001','ST001','item_108',1,100,'2025-08-29 12:32:06',3,2,NULL,69),(3,'PD001','ST001','item_105',1,520,'2025-08-29 12:32:06',2,1,NULL,69),(4,'PD001','ST001','item_109',1,300,'2025-08-29 12:32:06',3,1,NULL,69);
 /*!40000 ALTER TABLE `material_assign` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -618,7 +652,7 @@ CREATE TABLE `material_dispatch` (
   KEY `fk_material_dispatch_desc_id` (`desc_id`),
   CONSTRAINT `fk_material_assign_id` FOREIGN KEY (`material_assign_id`) REFERENCES `material_assign` (`id`),
   CONSTRAINT `fk_material_dispatch_desc_id` FOREIGN KEY (`desc_id`) REFERENCES `work_descriptions` (`desc_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -627,7 +661,7 @@ CREATE TABLE `material_dispatch` (
 
 LOCK TABLES `material_dispatch` WRITE;
 /*!40000 ALTER TABLE `material_dispatch` DISABLE KEYS */;
-INSERT INTO `material_dispatch` VALUES (1,2,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',75,25,NULL,'15 Ltrs x 5 Plastic pails','  5 Ltrs x 5 Plastic pails',NULL,'6789098483','998717'),(2,3,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',75,25,NULL,'10 Ltrs x 7 Plastic pails ,  5 Ltrs x 1 Plastric pails ','5 Ltrs x 5 cans',NULL,'6789098483','998717'),(3,4,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',NULL,NULL,NULL,NULL,NULL,NULL,'6789098483','998717'),(4,5,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',2000,400,NULL,'2000 ml x 1 Plastic pail','400 ml x 1 can ',NULL,'6789098483','998717'),(5,6,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',NULL,NULL,NULL,NULL,NULL,NULL,'6789098483','998717'),(6,7,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',1000,500,NULL,'1000 ml x 1 can','500 ml x 1 can',NULL,'6789098483','998717'),(7,8,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',500,100,NULL,'500 ml x 1 can','100 ml x 1 can',NULL,'6789098483','998717'),(8,9,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',1000,200,NULL,'1000 ml x 1 can','200 ml x 1 can',NULL,'6789098483','998717'),(9,10,69,1,'2025-07-28',NULL,'2025-08-25 06:11:47','2025-08-25 06:11:47',NULL,NULL,NULL,NULL,NULL,NULL,'6789098483','998717');
+INSERT INTO `material_dispatch` VALUES (1,1,69,1,'2025-08-30',300.00,'2025-08-29 07:03:13','2025-08-29 07:03:13',150,100,50,'remarks 150','remarks 100','remarks 50','6789098483','998717'),(2,2,69,1,'2025-08-30',100.00,'2025-08-29 07:03:13','2025-08-29 07:03:13',60,40,NULL,'remarks 60','remarks 40',NULL,'6789098483','998717'),(3,3,69,1,'2025-08-30',520.00,'2025-08-29 07:03:13','2025-08-29 07:03:13',347,173,NULL,'remarks 347','remarks 173',NULL,'6789098483','998717'),(4,4,69,1,'2025-08-30',300.00,'2025-08-29 07:03:13','2025-08-29 07:03:13',225,75,NULL,'remarks 225','remarks 75',NULL,'6789098483','998717');
 /*!40000 ALTER TABLE `material_dispatch` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -653,6 +687,40 @@ LOCK TABLES `material_master` WRITE;
 /*!40000 ALTER TABLE `material_master` DISABLE KEYS */;
 INSERT INTO `material_master` VALUES ('item_1','CPS '),('item_10','Sathya Omegakoat 6000 FR Grey'),('item_100','Sathya Fluorocoat 9000'),('item_101','DW CS BC'),('item_102','No.1 sand'),('item_103','DW CS TC Pastel Green '),('item_104','SLF - SG Pastel Green'),('item_105','Sathya SLF - G RAL 7040 Grey'),('item_106','Sathya ZPP Primer Grey'),('item_107','SCPU TCPU DA Grey'),('item_108','NONO KOAT 2000'),('item_109','OMEGAKOAT 6000'),('item_11','Sathya Omegakoat FR PU Grey'),('item_110','Sathya HB PA Pearl Grey'),('item_111','Reflectkoat white'),('item_112','Powder For Light Green'),('item_113','SCPL TCPU Light Green'),('item_12','Sathya Omegakoat EPM 6000'),('item_13','SCPL TCPU RAL 5017'),('item_14','SCPL TCPU RAL 1026 yellow'),('item_15','SCPL TCPU RAL 6037'),('item_16','Sathya Nanokoat 2000'),('item_17','TCPU Clear'),('item_18','TCPU Clear'),('item_19','SCPL TCPU Smoke Grey'),('item_2','CPS PU'),('item_20','DTM UHB 6000 Smoke Grey'),('item_21','DTM 6000 UHB - 3K'),('item_22','SCPL TCPU Golden yellow'),('item_23','DTM 1K PU Maroon'),('item_24','Sathya ROZP Brown'),('item_25','Sathya TCPU UVR 750 Dark Green'),('item_26','Sathya TCPU UVR 750 Smoke Grey'),('item_27','Sathya DTM 600 Grey'),('item_28','Sathya TCPU UVR 750 Golden yellow'),('item_29','Sathya TCPU UVR 750 Sea Green'),('item_3','Sathya Duramort EP'),('item_30','Sathya TCPU UVR 750 Sky Blue'),('item_31','Sathya TCPU PO Red'),('item_32','Sathya TCPU UVR 750 Black'),('item_33','Sathya TCPU UVR 750 Signal Red'),('item_34','Sathya TCPU UVR 750 Canary yellow'),('item_35','Sathya TCPU UVR 750 PO Red'),('item_36','Stickers'),('item_37','Sathya ZPP Primer'),('item_38','Acrylic Primer'),('item_39','Sathya HBE Epoxy Light Green'),('item_4','Solvent'),('item_40','Aliphatic TCPU UVR 500 Dark Green'),('item_41','Fluorokoat 9000 - Comp.B'),('item_42','Sathya Reflectkoat white'),('item_43','All Surface Roller'),('item_44','SCC'),('item_45','DW CS Primer'),('item_46','Sand'),('item_47','DW CS TC Smoke Grey'),('item_48','TCPU RAL 7043 Grey'),('item_49','HBPU Int. Silver Grey'),('item_5','Duracrete PU Pearl Grey'),('item_50','HBPU Ext. Silver Grey'),('item_51','AFC Topcot Crimson'),('item_52','Rainguard PRO - Morning Glory'),('item_53','Sathya Line Marking Golden yellow'),('item_54','SCPL TCPU UVR 500 Golden yellow'),('item_55','Sathya SF ZPP Grey'),('item_56','SCPL TCPU RAL 2003 Orange'),('item_57','SCPL TCPU UVR 500 Black'),('item_58','Sathya DTM 1K PU Dark Grey'),('item_59','Sathya DTM Red'),('item_6','Duracrete PU Pearl Grey'),('item_60','Sathya TCPU DA Grey'),('item_61','H.B.C.1000 White'),('item_62','Sathya DTM 2K PU Light Green'),('item_63','Sathya TCPU UVR 500 Grey'),('item_64','CLEANING SOLVENT'),('item_65','Sathya HBE Epoxy Line Marking Golden yellow'),('item_66','Sathya SF HBE Epoxy Pearl Grey'),('item_67','Sathya SF PU Prime'),('item_68','Sathya HYC PU LIGHT BLUE'),('item_69','Roller'),('item_7','SCPL TCPU Pink'),('item_70','Tray'),('item_71','Putty Blade 4'),('item_72','Sheet'),('item_73','Interior Royale Roller'),('item_74','Sathya HYC PU Beige'),('item_75','9\" Roller'),('item_76','2\" Brush'),('item_77','Empty Plastic pail'),('item_78','Sathya HB PU RAL 7002 Olive Grey'),('item_79','Sathya SLS Screed'),('item_8','SCPL TCPU Blue RAL 5015'),('item_80','Sathya HB PU RAL 7031 Grey'),('item_81','Sathya HB PU RAL 7035 Grey'),('item_82','SCPL TCPU Red'),('item_83','SCPL TCPU Sky Blue'),('item_84','Sathya SLF - SG Pearl Grey'),('item_85','Sathya SLF - SG Pearl Grey'),('item_86','Sathya SLF - G Pearl Grey'),('item_87','Sathya SLF PU 2K P.Green'),('item_88','Sathya SLF PU 2K French Blue'),('item_89','ESDEE Coat PU Paint'),('item_9','Sathya Omegakoat 6000 Grey'),('item_90','Vertical Fall Arrest Equipment'),('item_91','SCPL ZPP Grey'),('item_92','Durakoat TCPU Oxford Blue'),('item_93','SCPL TCPU Ivory'),('item_94','Durakoat TCPU Opaline Green'),('item_95','GREENSOL 9000'),('item_96','CRE FR - Nile Blue'),('item_97','Sathya Technobond FR EP Grey'),('item_98','Sathya Technobond FR PU'),('item_99','SCPL TCPU Silver Grey');
 /*!40000 ALTER TABLE `material_master` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `material_usage`
+--
+
+DROP TABLE IF EXISTS `material_usage`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `material_usage` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `material_ack_id` int DEFAULT NULL,
+  `comp_a_qty` int DEFAULT NULL,
+  `comp_b_qty` int DEFAULT NULL,
+  `comp_c_qty` int DEFAULT NULL,
+  `comp_a_remarks` varchar(255) DEFAULT NULL,
+  `comp_b_remarks` varchar(255) DEFAULT NULL,
+  `comp_c_remarks` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `material_ack_id` (`material_ack_id`),
+  CONSTRAINT `material_usage_ibfk_1` FOREIGN KEY (`material_ack_id`) REFERENCES `material_acknowledgement` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `material_usage`
+--
+
+LOCK TABLES `material_usage` WRITE;
+/*!40000 ALTER TABLE `material_usage` DISABLE KEYS */;
+INSERT INTO `material_usage` VALUES (1,3,5,5,5,'used','used','used','2025-08-29 08:32:58','2025-08-29 08:32:58');
+/*!40000 ALTER TABLE `material_usage` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1216,7 +1284,7 @@ CREATE TABLE `transport_master` (
   CONSTRAINT `transport_master_ibfk_2` FOREIGN KEY (`vehicle_id`) REFERENCES `vehicle_master` (`id`) ON DELETE SET NULL,
   CONSTRAINT `transport_master_ibfk_3` FOREIGN KEY (`driver_id`) REFERENCES `driver_master` (`id`) ON DELETE SET NULL,
   CONSTRAINT `transport_master_ibfk_4` FOREIGN KEY (`dispatch_id`) REFERENCES `material_dispatch` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1225,7 +1293,7 @@ CREATE TABLE `transport_master` (
 
 LOCK TABLES `transport_master` WRITE;
 /*!40000 ALTER TABLE `transport_master` DISABLE KEYS */;
-INSERT INTO `transport_master` VALUES (1,2,'coimbatore',4,1,NULL,5000.00,37,'2025-08-23 10:50:12'),(2,2,'coimbatore',4,1,NULL,5000.00,38,'2025-08-23 10:50:12'),(3,2,'coimbatore',4,1,NULL,5000.00,39,'2025-08-23 10:50:12'),(4,2,'coimbatore',4,1,NULL,5000.00,40,'2025-08-23 10:50:12'),(5,2,'coimbatore',4,1,NULL,5000.00,41,'2025-08-23 10:50:12'),(6,2,'coimbatore',4,1,NULL,5000.00,42,'2025-08-23 10:50:12'),(7,2,'coimbatore',4,1,NULL,5000.00,43,'2025-08-23 10:50:12'),(8,2,'coimbatore',4,1,NULL,5000.00,44,'2025-08-23 10:50:12'),(9,2,'coimbatore',4,1,NULL,5000.00,45,'2025-08-23 10:50:12'),(10,2,'coimbatore',4,1,NULL,5000.00,46,'2025-08-23 10:50:12'),(11,2,'coimbatore',4,1,NULL,5000.00,47,'2025-08-23 10:50:12'),(12,2,'coimbatore',4,1,NULL,5000.00,48,'2025-08-23 10:50:12'),(13,3,'chennai',3,3,NULL,5000.00,49,'2025-08-23 10:52:49'),(14,3,'chennai',3,3,NULL,5000.00,50,'2025-08-23 10:52:49'),(15,3,'chennai',3,3,NULL,5000.00,51,'2025-08-23 10:52:49'),(16,3,'chennai',3,3,NULL,5000.00,52,'2025-08-23 10:52:49'),(17,3,'chennai',3,3,NULL,5000.00,53,'2025-08-23 10:52:49'),(18,3,'chennai',3,3,NULL,5000.00,54,'2025-08-23 10:52:49'),(19,3,'chennai',3,3,NULL,5000.00,55,'2025-08-23 10:52:49'),(20,3,'chennai',3,3,NULL,5000.00,56,'2025-08-23 10:52:49'),(21,9,'perundurai',3,3,NULL,20000.00,1,'2025-08-25 11:41:47'),(22,9,'perundurai',3,3,NULL,20000.00,2,'2025-08-25 11:41:47'),(23,9,'perundurai',3,3,NULL,20000.00,3,'2025-08-25 11:41:47'),(24,9,'perundurai',3,3,NULL,20000.00,4,'2025-08-25 11:41:47'),(25,9,'perundurai',3,3,NULL,20000.00,5,'2025-08-25 11:41:47'),(26,9,'perundurai',3,3,NULL,20000.00,6,'2025-08-25 11:41:47'),(27,9,'perundurai',3,3,NULL,20000.00,7,'2025-08-25 11:41:47'),(28,9,'perundurai',3,3,NULL,20000.00,8,'2025-08-25 11:41:47'),(29,9,'perundurai',3,3,NULL,20000.00,9,'2025-08-25 11:41:47');
+INSERT INTO `transport_master` VALUES (1,2,'coimbatore',4,1,NULL,5000.00,37,'2025-08-23 10:50:12'),(2,2,'coimbatore',4,1,NULL,5000.00,38,'2025-08-23 10:50:12'),(3,2,'coimbatore',4,1,NULL,5000.00,39,'2025-08-23 10:50:12'),(4,2,'coimbatore',4,1,NULL,5000.00,40,'2025-08-23 10:50:12'),(5,2,'coimbatore',4,1,NULL,5000.00,41,'2025-08-23 10:50:12'),(6,2,'coimbatore',4,1,NULL,5000.00,42,'2025-08-23 10:50:12'),(7,2,'coimbatore',4,1,NULL,5000.00,43,'2025-08-23 10:50:12'),(8,2,'coimbatore',4,1,NULL,5000.00,44,'2025-08-23 10:50:12'),(9,2,'coimbatore',4,1,NULL,5000.00,45,'2025-08-23 10:50:12'),(10,2,'coimbatore',4,1,NULL,5000.00,46,'2025-08-23 10:50:12'),(11,2,'coimbatore',4,1,NULL,5000.00,47,'2025-08-23 10:50:12'),(12,2,'coimbatore',4,1,NULL,5000.00,48,'2025-08-23 10:50:12'),(13,3,'chennai',3,3,NULL,5000.00,49,'2025-08-23 10:52:49'),(14,3,'chennai',3,3,NULL,5000.00,50,'2025-08-23 10:52:49'),(15,3,'chennai',3,3,NULL,5000.00,51,'2025-08-23 10:52:49'),(16,3,'chennai',3,3,NULL,5000.00,52,'2025-08-23 10:52:49'),(17,3,'chennai',3,3,NULL,5000.00,53,'2025-08-23 10:52:49'),(18,3,'chennai',3,3,NULL,5000.00,54,'2025-08-23 10:52:49'),(19,3,'chennai',3,3,NULL,5000.00,55,'2025-08-23 10:52:49'),(20,3,'chennai',3,3,NULL,5000.00,56,'2025-08-23 10:52:49'),(21,9,'perundurai',3,3,NULL,20000.00,1,'2025-08-25 11:41:47'),(22,9,'perundurai',3,3,NULL,20000.00,2,'2025-08-25 11:41:47'),(23,9,'perundurai',3,3,NULL,20000.00,3,'2025-08-25 11:41:47'),(24,9,'perundurai',3,3,NULL,20000.00,4,'2025-08-25 11:41:47'),(25,9,'perundurai',3,3,NULL,20000.00,5,'2025-08-25 11:41:47'),(26,9,'perundurai',3,3,NULL,20000.00,6,'2025-08-25 11:41:47'),(27,9,'perundurai',3,3,NULL,20000.00,7,'2025-08-25 11:41:47'),(28,9,'perundurai',3,3,NULL,20000.00,8,'2025-08-25 11:41:47'),(29,9,'perundurai',3,3,NULL,20000.00,9,'2025-08-25 11:41:47'),(30,2,'coimbatore',3,1,NULL,10000.00,1,'2025-08-29 10:32:58'),(31,2,'coimbatore',1,1,NULL,5000.00,1,'2025-08-29 12:33:13'),(32,2,'coimbatore',1,1,NULL,5000.00,2,'2025-08-29 12:33:13'),(33,2,'coimbatore',1,1,NULL,5000.00,3,'2025-08-29 12:33:13'),(34,2,'coimbatore',1,1,NULL,5000.00,4,'2025-08-29 12:33:13');
 /*!40000 ALTER TABLE `transport_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1393,4 +1461,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-08-25 15:51:44
+-- Dump completed on 2025-09-01  9:48:34
