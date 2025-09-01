@@ -1,176 +1,3 @@
-// const db = require('../config/db');
-
-// exports.saveCompletionStatus = async (req, res) => {
-//   try {
-//     const { rec_id, area_completed, rate, value, created_by } = req.body;
-
-//     // Validate inputs (unchanged)
-//     if (!rec_id || typeof rec_id !== 'number') {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'rec_id is required and must be a number',
-//       });
-//     }
-//     if (area_completed === undefined || typeof area_completed !== 'number' || area_completed < 0) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'area_completed is required and must be a non-negative number',
-//       });
-//     }
-//     if (rate === undefined || typeof rate !== 'number' || rate < 0) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'rate is required and must be a non-negative number',
-//       });
-//     }
-//     if (value === undefined || typeof value !== 'number' || value < 0) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'value is required and must be a non-negative number',
-//       });
-//     }
-//     if (!created_by || typeof created_by !== 'number') {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'created_by is required and must be a number',
-//       });
-//     }
-
-//     // Check that rec_id exists in po_reckoner
-//     const [reckonerRecord] = await db.query(
-//       'SELECT rec_id FROM po_reckoner WHERE rec_id = ?',
-//       [rec_id]
-//     );
-//     if (reckonerRecord.length === 0) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: `Invalid rec_id (${rec_id}): record does not exist in po_reckoner`,
-//       });
-//     }
-
-//     // Check that created_by exists in users
-//     const [userRecord] = await db.query(
-//       'SELECT user_id FROM users WHERE user_id = ?',
-//       [created_by]
-//     );
-//     if (userRecord.length === 0) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: `Invalid created_by (${created_by}): user does not exist`,
-//       });
-//     }
-
-//     // Check if completion_status record exists
-//     const [completionRecord] = await db.query(
-//       'SELECT rec_id FROM completion_status WHERE rec_id = ?',
-//       [rec_id]
-//     );
-
-//     // Calculate server-side value (for consistency/security)
-//     const calculatedValue = parseFloat(area_completed) * parseFloat(rate);
-//     if (Math.abs(calculatedValue - value) > 0.01) {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: `Invalid value: expected ${calculatedValue.toFixed(2)}, received ${value}`,
-//       });
-//     }
-
-//     // Prepare completion data
-//     const completionData = {
-//       rec_id,
-//       area_completed: parseFloat(area_completed),
-//       rate: parseFloat(rate),
-//       value: parseFloat(calculatedValue.toFixed(2)),
-//       created_by: parseInt(created_by),
-//       work_status: 'In Progress',
-//       billing_status: 'Not Billed',
-//     };
-
-//     let result;
-//     if (completionRecord.length === 0) {
-//       // If not exists: INSERT instead of returning 404
-//       [result] = await db.query(
-//         `
-//           INSERT INTO completion_status
-//           (rec_id, area_completed, rate, value, created_by, work_status, billing_status, created_at, updated_at)
-//           VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-//         `,
-//         [
-//           completionData.rec_id,
-//           completionData.area_completed,
-//           completionData.rate,
-//           completionData.value,
-//           completionData.created_by,
-//           completionData.work_status,
-//           completionData.billing_status,
-//         ]
-//       );
-//       if (result.affectedRows === 0) {
-//         return res.status(500).json({
-//           status: 'error',
-//           message: `Failed to create completion status for rec_id (${rec_id})`,
-//         });
-//       }
-//       res.status(201).json({
-//         status: 'success',
-//         message: 'Completion status created successfully',
-//         data: completionData,
-//       });
-//     } else {
-//       // If exists: UPDATE
-//       [result] = await db.query(
-//         `
-//           UPDATE completion_status
-//           SET
-//             area_completed = ?,
-//             rate = ?,
-//             value = ?,
-//             created_by = ?,
-//             work_status = ?,
-//             billing_status = ?,
-//             updated_at = NOW()
-//           WHERE rec_id = ?
-//         `,
-//         [
-//           completionData.area_completed,
-//           completionData.rate,
-//           completionData.value,
-//           completionData.created_by,
-//           completionData.work_status,
-//           completionData.billing_status,
-//           completionData.rec_id,
-//         ]
-//       );
-//       if (result.affectedRows === 0) {
-//         return res.status(404).json({
-//           status: 'error',
-//           message: `Failed to update: no record found for rec_id (${rec_id})`,
-//         });
-//       }
-//       res.status(200).json({
-//         status: 'success',
-//         message: 'Completion status updated successfully',
-//         data: completionData,
-//       });
-//     }
-//   } catch (error) {
-//     console.error('Error in saveCompletionStatus:', error);
-//     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
-//       return res.status(400).json({
-//         status: 'error',
-//         message: 'Invalid rec_id or created_by: referenced record does not exist',
-//       });
-//     }
-//     res.status(500).json({
-//       status: 'error',
-//       message: 'Internal server error',
-//       error: error.message,
-//     });
-//   }
-// };
-
-
-
 const db = require('../config/db');
 
 
@@ -488,6 +315,330 @@ exports.getCompletionEntriesBySiteID = async (req, res) => {
       status: 'error',
       message: 'Internal server error',
       error: error.message,
+    });
+  }
+};
+
+
+
+exports.saveMaterialAcknowledgement = async (req, res) => {
+  try {
+    const { material_dispatch_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks } = req.body;
+
+    // Log incoming request body for debugging
+    console.log('Request body:', req.body);
+
+    // Validate material_dispatch_id
+    if (!material_dispatch_id || isNaN(material_dispatch_id)) {
+      return res.status(400).json({ status: 'error', message: 'material_dispatch_id is required and must be a number' });
+    }
+
+    // Convert material_dispatch_id to integer
+    const dispatchId = parseInt(material_dispatch_id);
+    if (isNaN(dispatchId)) {
+      return res.status(400).json({ status: 'error', message: 'material_dispatch_id must be a valid number' });
+    }
+
+    // Validate quantities if provided
+    const validateQuantity = (qty, field) => {
+      if (qty === null || qty === undefined) return null;
+      const parsed = parseInt(qty);
+      if (isNaN(parsed) || parsed < 0) {
+        throw new Error(`${field} must be a non-negative number or null`);
+      }
+      return parsed;
+    };
+
+    const validatedCompAQty = validateQuantity(comp_a_qty, 'comp_a_qty');
+    const validatedCompBQty = validateQuantity(comp_b_qty, 'comp_b_qty');
+    const validatedCompCQty = validateQuantity(comp_c_qty, 'comp_c_qty');
+
+    // Validate remarks if provided
+    if (comp_a_remarks && typeof comp_a_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_a_remarks must be a string' });
+    }
+    if (comp_b_remarks && typeof comp_b_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_b_remarks must be a string' });
+    }
+    if (comp_c_remarks && typeof comp_c_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_c_remarks must be a string' });
+    }
+
+    // Check database connection
+    try {
+      await db.query('SELECT 1');
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      return res.status(500).json({ status: 'error', message: 'Database connection failed', error: dbError.message });
+    }
+
+    // Check if material_dispatch_id exists
+    const [dispatchRecord] = await db.query('SELECT id FROM material_dispatch WHERE id = ?', [dispatchId]);
+    if (dispatchRecord.length === 0) {
+      return res.status(400).json({ status: 'error', message: `Invalid material_dispatch_id (${dispatchId}): record does not exist` });
+    }
+
+    // Check if acknowledgement already exists
+    const [existingAck] = await db.query('SELECT id FROM material_acknowledgement WHERE material_dispatch_id = ?', [dispatchId]);
+    if (existingAck.length > 0) {
+      return res.status(400).json({ status: 'error', message: `Acknowledgement already exists for material_dispatch_id (${dispatchId})` });
+    }
+
+    // Insert into material_acknowledgement
+    const [result] = await db.query(
+      `
+        INSERT INTO material_acknowledgement
+        (material_dispatch_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      `,
+      [
+        dispatchId,
+        validatedCompAQty,
+        validatedCompBQty,
+        validatedCompCQty,
+        comp_a_remarks || null,
+        comp_b_remarks || null,
+        comp_c_remarks || null
+      ]
+    );
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Material acknowledgement saved successfully',
+      data: {
+        id: result.insertId,
+        material_dispatch_id: dispatchId,
+        comp_a_qty: validatedCompAQty,
+        comp_b_qty: validatedCompBQty,
+        comp_c_qty: validatedCompCQty,
+        comp_a_remarks: comp_a_remarks || null,
+        comp_b_remarks: comp_b_remarks || null,
+        comp_c_remarks: comp_c_remarks || null
+      }
+    });
+  } catch (error) {
+    console.error('Error in saveMaterialAcknowledgement:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Acknowledgement already exists for this material dispatch'
+      });
+    }
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid material_dispatch_id: referenced record does not exist'
+      });
+    }
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid data format in request',
+        error: error.message
+      });
+    }
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+
+
+exports.getAcknowledgementDetails = async (req, res) => {
+  try {
+    const { material_dispatch_id } = req.query;
+
+    if (!material_dispatch_id || isNaN(material_dispatch_id)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'material_dispatch_id is required and must be a number',
+      });
+    }
+
+    const dispatchId = parseInt(material_dispatch_id);
+    if (isNaN(dispatchId)) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'material_dispatch_id must be a valid number',
+      });
+    }
+
+    const query = `
+      SELECT 
+        id AS ack_id,
+        material_dispatch_id,
+        comp_a_qty AS ack_comp_a_qty,
+        comp_b_qty AS ack_comp_b_qty,
+        comp_c_qty AS ack_comp_c_qty,
+        comp_a_remarks AS ack_comp_a_remarks,
+        comp_b_remarks AS ack_comp_b_remarks,
+        comp_c_remarks AS ack_comp_c_remarks,
+        created_at AS ack_created_at,
+        updated_at AS ack_updated_at
+      FROM material_acknowledgement
+      WHERE material_dispatch_id = ?
+    `;
+
+    const [rows] = await db.query(query, [dispatchId]);
+
+    const data = rows.map(row => ({
+      id: row.ack_id,
+      material_dispatch_id: row.material_dispatch_id,
+      acknowledgement: {
+        id: row.ack_id,
+        comp_a_qty: row.ack_comp_a_qty,
+        comp_b_qty: row.ack_comp_b_qty,
+        comp_c_qty: row.ack_comp_c_qty,
+        comp_a_remarks: row.ack_comp_a_remarks,
+        comp_b_remarks: row.ack_comp_b_remarks,
+        comp_c_remarks: row.ack_comp_c_remarks,
+        created_at: row.ack_created_at,
+        updated_at: row.ack_updated_at
+      }
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Acknowledgement details fetched successfully',
+      data
+    });
+  } catch (error) {
+    console.error('Error in getAcknowledgementDetails:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+
+
+
+
+exports.saveMaterialUsage = async (req, res) => {
+  try {
+    const { material_ack_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks } = req.body;
+
+    // Log incoming request body for debugging
+    console.log('Request body:', req.body);
+
+    // Validate material_ack_id
+    if (!material_ack_id || isNaN(material_ack_id)) {
+      return res.status(400).json({ status: 'error', message: 'material_ack_id is required and must be a number' });
+    }
+
+    // Convert material_ack_id to integer
+    const ackId = parseInt(material_ack_id);
+    if (isNaN(ackId)) {
+      return res.status(400).json({ status: 'error', message: 'material_ack_id must be a valid number' });
+    }
+
+    // Validate quantities if provided
+    const validateQuantity = (qty, field) => {
+      if (qty === null || qty === undefined) return null;
+      const parsed = parseInt(qty);
+      if (isNaN(parsed) || parsed < 0) {
+        throw new Error(`${field} must be a non-negative number or null`);
+      }
+      return parsed;
+    };
+
+    const validatedCompAQty = validateQuantity(comp_a_qty, 'comp_a_qty');
+    const validatedCompBQty = validateQuantity(comp_b_qty, 'comp_b_qty');
+    const validatedCompCQty = validateQuantity(comp_c_qty, 'comp_c_qty');
+
+    // Validate remarks if provided
+    if (comp_a_remarks && typeof comp_a_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_a_remarks must be a string' });
+    }
+    if (comp_b_remarks && typeof comp_b_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_b_remarks must be a string' });
+    }
+    if (comp_c_remarks && typeof comp_c_remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'comp_c_remarks must be a string' });
+    }
+
+    // Check database connection
+    try {
+      await db.query('SELECT 1');
+    } catch (dbError) {
+      console.error('Database connection error:', dbError);
+      return res.status(500).json({ status: 'error', message: 'Database connection failed', error: dbError.message });
+    }
+
+    // Check if material_ack_id exists
+    const [ackRecord] = await db.query('SELECT id FROM material_acknowledgement WHERE id = ?', [ackId]);
+    if (ackRecord.length === 0) {
+      return res.status(400).json({ status: 'error', message: `Invalid material_ack_id (${ackId}): record does not exist` });
+    }
+
+    // Check if usage already exists
+    const [existingUsage] = await db.query('SELECT id FROM material_usage WHERE material_ack_id = ?', [ackId]);
+    if (existingUsage.length > 0) {
+      return res.status(400).json({ status: 'error', message: `Usage already exists for material_ack_id (${ackId})` });
+    }
+
+    // Insert into material_usage
+    const [result] = await db.query(
+      `
+        INSERT INTO material_usage
+        (material_ack_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+      `,
+      [
+        ackId,
+        validatedCompAQty,
+        validatedCompBQty,
+        validatedCompCQty,
+        comp_a_remarks || null,
+        comp_b_remarks || null,
+        comp_c_remarks || null
+      ]
+    );
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Material usage saved successfully',
+      data: {
+        id: result.insertId,
+        material_ack_id: ackId,
+        comp_a_qty: validatedCompAQty,
+        comp_b_qty: validatedCompBQty,
+        comp_c_qty: validatedCompCQty,
+        comp_a_remarks: comp_a_remarks || null,
+        comp_b_remarks: comp_b_remarks || null,
+        comp_c_remarks: comp_c_remarks || null
+      }
+    });
+  } catch (error) {
+    console.error('Error in saveMaterialUsage:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Usage already exists for this material acknowledgement'
+      });
+    }
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid material_ack_id: referenced record does not exist'
+      });
+    }
+    if (error.code === 'ER_BAD_FIELD_ERROR') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid data format in request',
+        error: error.message
+      });
+    }
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
     });
   }
 };

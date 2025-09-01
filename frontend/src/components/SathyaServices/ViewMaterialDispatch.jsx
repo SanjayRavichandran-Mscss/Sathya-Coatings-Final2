@@ -32,7 +32,7 @@
 //   const fetchProjects = async () => {
 //     try {
 //       setLoading((prev) => ({ ...prev, projects: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/projects");
+//       const response = await axios.get("http://localhost:5000/material/projects");
 //       setProjects(response.data.data || []);
 //     } catch (error) {
 //       console.error("Error fetching projects:", error);
@@ -46,7 +46,7 @@
 //   const fetchSites = async (pd_id) => {
 //     try {
 //       setLoading((prev) => ({ ...prev, sites: true }));
-//       const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
+//       const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
 //       setSites(response.data.data || []);
 //     } catch (error) {
 //       console.error("Error fetching sites:", error);
@@ -63,7 +63,7 @@
 //     try {
 //       setLoading((prev) => ({ ...prev, materials: true }));
 //       setError(null);
-//       const response = await axios.get("http://103.118.158.33/api/material/dispatch-details", {
+//       const response = await axios.get("http://localhost:5000/material/dispatch-details", {
 //         params: { pd_id: selectedProject, site_id: selectedSite },
 //       });
 //       const materials = response.data.data || [];
@@ -548,7 +548,7 @@ const ViewMaterialDispatch = () => {
   const fetchProjects = async () => {
     try {
       setLoading((prev) => ({ ...prev, projects: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/projects");
+      const response = await axios.get("http://localhost:5000/material/projects");
       setProjects(response.data.data || []);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -562,7 +562,7 @@ const ViewMaterialDispatch = () => {
   const fetchSites = async (pd_id) => {
     try {
       setLoading((prev) => ({ ...prev, sites: true }));
-      const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
+      const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
       setSites(response.data.data || []);
     } catch (error) {
       console.error("Error fetching sites:", error);
@@ -579,7 +579,7 @@ const ViewMaterialDispatch = () => {
     try {
       setLoading((prev) => ({ ...prev, materials: true }));
       setError(null);
-      const response = await axios.get("http://103.118.158.33/api/material/dispatch-details", {
+      const response = await axios.get("http://localhost:5000/material/dispatch-details", {
         params: { pd_id: selectedProject, site_id: selectedSite },
       });
       const materials = response.data.data || [];

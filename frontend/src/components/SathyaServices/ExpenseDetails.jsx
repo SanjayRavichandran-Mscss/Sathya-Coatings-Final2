@@ -31,7 +31,7 @@ const ExpenseDetails = () => {
     const fetchProjects = async () => {
       try {
         setLoading((prev) => ({ ...prev, projects: true }));
-        const response = await axios.get("http://103.118.158.33/api/material/projects");
+        const response = await axios.get("http://localhost:5000/material/projects");
         setProjects(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -49,7 +49,7 @@ const ExpenseDetails = () => {
       const fetchSites = async () => {
         try {
           setLoading((prev) => ({ ...prev, sites: true }));
-          const response = await axios.get(`http://103.118.158.33/api/material/sites/${formData.pd_id}`);
+          const response = await axios.get(`http://localhost:5000/material/sites/${formData.pd_id}`);
           setSites(Array.isArray(response.data.data) ? response.data.data : []);
         } catch (error) {
           console.error("Error fetching sites:", error);
@@ -73,7 +73,7 @@ const ExpenseDetails = () => {
       const fetchWorkDescriptions = async () => {
         try {
           setLoading((prev) => ({ ...prev, workDescriptions: true }));
-          const response = await axios.get(`http://103.118.158.33/api/expense/work-descriptions/${formData.site_id}`);
+          const response = await axios.get(`http://localhost:5000/expense/work-descriptions/${formData.site_id}`);
           setWorkDescriptions(Array.isArray(response.data.data) ? response.data.data : []);
         } catch (error) {
           console.error("Error fetching work descriptions:", error);
@@ -95,7 +95,7 @@ const ExpenseDetails = () => {
     const fetchPettyCash = async () => {
       try {
         setLoading((prev) => ({ ...prev, pettyCash: true }));
-        const response = await axios.get("http://103.118.158.33/api/expense/fetch-petty-cash");
+        const response = await axios.get("http://localhost:5000/expense/fetch-petty-cash");
         const records = Array.isArray(response.data.data)
           ? response.data.data.map((record) => ({
               ...record,
@@ -142,12 +142,12 @@ const ExpenseDetails = () => {
 
       const token = localStorage.getItem("token");
       await axios.post(
-        "http://103.118.158.33/api/expense/add-petty-cash",
+        "http://localhost:5000/expense/add-petty-cash",
         [{ pd_id, site_id, desc_id, assign_date, amount: parsedAmount }],
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      const response = await axios.get("http://103.118.158.33/api/expense/fetch-petty-cash");
+      const response = await axios.get("http://localhost:5000/expense/fetch-petty-cash");
       const records = Array.isArray(response.data.data)
         ? response.data.data.map((record) => ({
             ...record,

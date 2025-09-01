@@ -49,7 +49,7 @@ const ExpenseEntry = () => {
     const fetchProjects = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://103.118.158.33/api/material/projects");
+        const response = await axios.get("http://localhost:5000/material/projects");
         setProjects(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -66,7 +66,7 @@ const ExpenseEntry = () => {
       const fetchSites = async () => {
         try {
           setLoading(true);
-          const response = await axios.get(`http://103.118.158.33/api/material/sites/${formData.pd_id}`);
+          const response = await axios.get(`http://localhost:5000/material/sites/${formData.pd_id}`);
           setSites(Array.isArray(response.data.data) ? response.data.data : []);
         } catch (error) {
           console.error("Error fetching sites:", error);
@@ -89,7 +89,7 @@ const ExpenseEntry = () => {
         try {
           setLoading(true);
           const response = await axios.post(
-            "http://103.118.158.33/api/expense/fetch-petty-cash-by-site",
+            "http://localhost:5000/expense/fetch-petty-cash-by-site",
             { site_id: formData.site_id },
             {
               headers: {
@@ -110,7 +110,7 @@ const ExpenseEntry = () => {
 
           const expensesPromises = records.map((record) =>
             axios.post(
-              "http://103.118.158.33/api/expense/fetch-expenses-by-petty-cash",
+              "http://localhost:5000/expense/fetch-expenses-by-petty-cash",
               { petty_cash_id: record.id },
               {
                 headers: {
@@ -153,7 +153,7 @@ const ExpenseEntry = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axios.get("http://103.118.158.33/api/expense/categories");
+        const response = await axios.get("http://localhost:5000/expense/categories");
         setCategories(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -169,7 +169,7 @@ const ExpenseEntry = () => {
         try {
           setLoading(true);
           const response = await axios.post(
-            "http://103.118.158.33/api/expense/fetch-details",
+            "http://localhost:5000/expense/fetch-details",
             { exp_category_id: parseInt(expenseForm.expense_category_id) },
             {
               headers: {
@@ -252,7 +252,7 @@ const ExpenseEntry = () => {
       }
 
       const response = await axios.post(
-        "http://103.118.158.33/api/expense/add-siteincharge-expense",
+        "http://localhost:5000/expense/add-siteincharge-expense",
         {
           petty_cash_id,
           expense_category_id: parseInt(expense_category_id),
@@ -267,7 +267,7 @@ const ExpenseEntry = () => {
       );
 
       const refreshResponse = await axios.post(
-        "http://103.118.158.33/api/expense/fetch-petty-cash-by-site",
+        "http://localhost:5000/expense/fetch-petty-cash-by-site",
         { site_id: formData.site_id },
         {
           headers: {
@@ -287,7 +287,7 @@ const ExpenseEntry = () => {
       setPettyCashRecords(records);
 
       const expensesResponse = await axios.post(
-        "http://103.118.158.33/api/expense/fetch-expenses-by-petty-cash",
+        "http://localhost:5000/expense/fetch-expenses-by-petty-cash",
         { petty_cash_id },
         {
           headers: {

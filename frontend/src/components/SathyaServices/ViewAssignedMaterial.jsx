@@ -143,11 +143,13 @@
 //   const [sites, setSites] = useState([]);
 //   const [selectedProject, setSelectedProject] = useState("");
 //   const [selectedSite, setSelectedSite] = useState("");
+//   const [nextDcNo, setNextDcNo] = useState("");
 //   const [assignedMaterials, setAssignedMaterials] = useState([]);
 //   const [groupedMaterials, setGroupedMaterials] = useState({});
 //   const [loading, setLoading] = useState({
 //     projects: false,
 //     sites: false,
+//     dcNo: false,
 //     materials: false,
 //     transportTypes: false,
 //     providers: false,
@@ -191,7 +193,7 @@
 //   const fetchProjects = async () => {
 //     try {
 //       setLoading((prev) => ({ ...prev, projects: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/projects");
+//       const response = await axios.get("http://localhost:5000/material/projects");
 //       setProjects(response.data.data || []);
 //       if (response.data.data.length > 0 && !selectedProject) {
 //         setSelectedProject(response.data.data[0].pd_id);
@@ -208,7 +210,7 @@
 //   const fetchSites = async (pd_id) => {
 //     try {
 //       setLoading((prev) => ({ ...prev, sites: true }));
-//       const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
+//       const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
 //       setSites(response.data.data || []);
 //       if (response.data.data.length > 0 && !selectedSite) {
 //         setSelectedSite(response.data.data[0].site_id);
@@ -234,11 +236,32 @@
 //     }
 //   };
 
+//   // Fetch next DC No
+//   const fetchNextDcNo = async () => {
+//     if (!selectedSite) return;
+//     try {
+//       setLoading((prev) => ({ ...prev, dcNo: true }));
+//       const response = await axios.get("http://localhost:5000/material/next-dc-no");
+//       setNextDcNo(response.data.data.next_dc_no || "");
+//       setDispatchData((prev) => ({
+//         ...prev,
+//         dc_no: response.data.data.next_dc_no || "",
+//       }));
+//     } catch (error) {
+//       console.error("Error fetching next DC No:", error);
+//       setError("Failed to load next DC No. Please try again.");
+//       setNextDcNo("");
+//       setDispatchData((prev) => ({ ...prev, dc_no: "" }));
+//     } finally {
+//       setLoading((prev) => ({ ...prev, dcNo: false }));
+//     }
+//   };
+
 //   // Fetch transport types
 //   const fetchTransportTypes = async () => {
 //     try {
 //       setLoading((prev) => ({ ...prev, transportTypes: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/transport-types");
+//       const response = await axios.get("http://localhost:5000/material/transport-types");
 //       setTransportTypes(response.data.data || []);
 //     } catch (error) {
 //       console.error("Error fetching transport types:", error);
@@ -252,7 +275,7 @@
 //   const fetchProviders = async (transport_type_id) => {
 //     try {
 //       setLoading((prev) => ({ ...prev, providers: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/providers", {
+//       const response = await axios.get("http://localhost:5000/material/providers", {
 //         params: { transport_type_id: Number.isInteger(parseInt(transport_type_id)) ? transport_type_id : undefined },
 //       });
 //       setProviders(response.data.data || []);
@@ -268,7 +291,7 @@
 //   const fetchVehicles = async () => {
 //     try {
 //       setLoading((prev) => ({ ...prev, vehicles: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/vehicles");
+//       const response = await axios.get("http://localhost:5000/material/vehicles");
 //       setVehicles(response.data.data || []);
 //     } catch (error) {
 //       console.error("Error fetching vehicles:", error);
@@ -282,7 +305,7 @@
 //   const fetchDrivers = async () => {
 //     try {
 //       setLoading((prev) => ({ ...prev, drivers: true }));
-//       const response = await axios.get("http://103.118.158.33/api/material/drivers");
+//       const response = await axios.get("http://localhost:5000/material/drivers");
 //       setDrivers(response.data.data || []);
 //     } catch (error) {
 //       console.error("Error fetching drivers:", error);
@@ -298,7 +321,7 @@
 //     try {
 //       setLoading((prev) => ({ ...prev, materials: true }));
 //       setError(null);
-//       const response = await axios.get("http://103.118.158.33/api/material/assignments-with-dispatch", {
+//       const response = await axios.get("http://localhost:5000/material/assignments-with-dispatch", {
 //         params: { pd_id: selectedProject, site_id: selectedSite },
 //       });
 //       const materials = response.data.data || [];
@@ -367,6 +390,7 @@
 //     setGroupedMaterials({});
 //     setCalculatedQuantities({});
 //     setRemarks({});
+//     setNextDcNo("");
 //     setDispatchData({ dc_no: "", dispatch_date: "", order_no: "", vendor_code: "" });
 //     setTransportData({
 //       transport_type_id: "",
@@ -400,10 +424,12 @@
 //     setGroupedMaterials({});
 //     setCalculatedQuantities({});
 //     setRemarks({});
+//     setNextDcNo("");
 //     const selectedSiteData = sites.find((site) => site.site_id === site_id);
 //     setDispatchData((prev) => ({
 //       ...prev,
 //       order_no: selectedSiteData ? selectedSiteData.po_number || "" : "",
+//       dc_no: nextDcNo,
 //     }));
 //     setTransportData({
 //       transport_type_id: "",
@@ -613,7 +639,7 @@
 //       };
 
 //       // Submit combined payload
-//       const response = await axios.post("http://103.118.158.33/api/material/add-dispatch", payload);
+//       const response = await axios.post("http://localhost:5000/material/add-dispatch", payload);
 
 //       if (response.data.status === "already_dispatched") {
 //         const conflicts = response.data.conflicts
@@ -673,6 +699,7 @@
 //       if (Number.isInteger(parseInt(transportData.transport_type_id))) {
 //         await fetchProviders(transportData.transport_type_id);
 //       }
+//       await fetchNextDcNo();
 //     } catch (error) {
 //       console.error("Error dispatching materials or saving transport:", error);
 //       const errorMessage =
@@ -719,6 +746,7 @@
 //   useEffect(() => {
 //     if (selectedProject && selectedSite) {
 //       fetchAssignedMaterials();
+//       fetchNextDcNo();
 //     }
 //   }, [selectedProject, selectedSite]);
 
@@ -809,15 +837,13 @@
 //                 <label className="block text-xs font-medium text-gray-600" htmlFor="dc_no">
 //                   DC No <span className="text-red-500">*</span>
 //                 </label>
-//                 <input
-//                   type="number"
-//                   id="dc_no"
-//                   placeholder="Enter DC No"
-//                   value={dispatchData.dc_no}
-//                   onChange={(e) => handleDispatchChange("dc_no", e.target.value)}
-//                   className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 shadow-sm transition-all duration-200"
-//                   aria-required="true"
-//                 />
+//                 <div className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-gray-100 text-gray-700">
+//                   {loading.dcNo ? (
+//                     <Loader2 className="h-5 w-5 text-teal-500 animate-spin inline-block" />
+//                   ) : (
+//                     nextDcNo || "N/A"
+//                   )}
+//                 </div>
 //               </div>
 //               <div className="w-full sm:w-1/4">
 //                 <label className="block text-xs font-medium text-gray-600" htmlFor="dispatch_date">
@@ -1477,6 +1503,9 @@
 
 
 
+
+
+
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { Loader2, Package, FileText, X, Truck, ChevronDown } from "lucide-react";
@@ -1672,7 +1701,7 @@ const ViewAssignedMaterial = () => {
   const fetchProjects = async () => {
     try {
       setLoading((prev) => ({ ...prev, projects: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/projects");
+      const response = await axios.get("http://localhost:5000/material/projects");
       setProjects(response.data.data || []);
       if (response.data.data.length > 0 && !selectedProject) {
         setSelectedProject(response.data.data[0].pd_id);
@@ -1689,7 +1718,7 @@ const ViewAssignedMaterial = () => {
   const fetchSites = async (pd_id) => {
     try {
       setLoading((prev) => ({ ...prev, sites: true }));
-      const response = await axios.get(`http://103.118.158.33/api/material/sites/${pd_id}`);
+      const response = await axios.get(`http://localhost:5000/material/sites/${pd_id}`);
       setSites(response.data.data || []);
       if (response.data.data.length > 0 && !selectedSite) {
         setSelectedSite(response.data.data[0].site_id);
@@ -1720,7 +1749,7 @@ const ViewAssignedMaterial = () => {
     if (!selectedSite) return;
     try {
       setLoading((prev) => ({ ...prev, dcNo: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/next-dc-no");
+      const response = await axios.get("http://localhost:5000/material/next-dc-no");
       setNextDcNo(response.data.data.next_dc_no || "");
       setDispatchData((prev) => ({
         ...prev,
@@ -1740,7 +1769,7 @@ const ViewAssignedMaterial = () => {
   const fetchTransportTypes = async () => {
     try {
       setLoading((prev) => ({ ...prev, transportTypes: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/transport-types");
+      const response = await axios.get("http://localhost:5000/material/transport-types");
       setTransportTypes(response.data.data || []);
     } catch (error) {
       console.error("Error fetching transport types:", error);
@@ -1754,7 +1783,7 @@ const ViewAssignedMaterial = () => {
   const fetchProviders = async (transport_type_id) => {
     try {
       setLoading((prev) => ({ ...prev, providers: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/providers", {
+      const response = await axios.get("http://localhost:5000/material/providers", {
         params: { transport_type_id: Number.isInteger(parseInt(transport_type_id)) ? transport_type_id : undefined },
       });
       setProviders(response.data.data || []);
@@ -1770,7 +1799,7 @@ const ViewAssignedMaterial = () => {
   const fetchVehicles = async () => {
     try {
       setLoading((prev) => ({ ...prev, vehicles: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/vehicles");
+      const response = await axios.get("http://localhost:5000/material/vehicles");
       setVehicles(response.data.data || []);
     } catch (error) {
       console.error("Error fetching vehicles:", error);
@@ -1784,7 +1813,7 @@ const ViewAssignedMaterial = () => {
   const fetchDrivers = async () => {
     try {
       setLoading((prev) => ({ ...prev, drivers: true }));
-      const response = await axios.get("http://103.118.158.33/api/material/drivers");
+      const response = await axios.get("http://localhost:5000/material/drivers");
       setDrivers(response.data.data || []);
     } catch (error) {
       console.error("Error fetching drivers:", error);
@@ -1800,7 +1829,7 @@ const ViewAssignedMaterial = () => {
     try {
       setLoading((prev) => ({ ...prev, materials: true }));
       setError(null);
-      const response = await axios.get("http://103.118.158.33/api/material/assignments-with-dispatch", {
+      const response = await axios.get("http://localhost:5000/material/assignments-with-dispatch", {
         params: { pd_id: selectedProject, site_id: selectedSite },
       });
       const materials = response.data.data || [];
@@ -1828,15 +1857,15 @@ const ViewAssignedMaterial = () => {
         newQuantities[assignment.id] = {
           comp_a_qty:
             totalRatio && assignment.comp_ratio_a !== null
-              ? Math.round((assignment.comp_ratio_a / totalRatio) * assignment.quantity)
+              ? Math.round((assignment.comp_ratio_a / totalRatio) * assignment.remaining_quantity)
               : null,
           comp_b_qty:
             totalRatio && assignment.comp_ratio_b !== null
-              ? Math.round((assignment.comp_ratio_b / totalRatio) * assignment.quantity)
+              ? Math.round((assignment.comp_ratio_b / totalRatio) * assignment.remaining_quantity)
               : null,
           comp_c_qty:
             totalRatio && assignment.comp_ratio_c !== null
-              ? Math.round((assignment.comp_ratio_c / totalRatio) * assignment.quantity)
+              ? Math.round((assignment.comp_ratio_c / totalRatio) * assignment.remaining_quantity)
               : null,
         };
         newRemarks[assignment.id] = {
@@ -2118,17 +2147,17 @@ const ViewAssignedMaterial = () => {
       };
 
       // Submit combined payload
-      const response = await axios.post("http://103.118.158.33/api/material/add-dispatch", payload);
+      const response = await axios.post("http://localhost:5000/material/add-dispatch", payload);
 
       if (response.data.status === "already_dispatched") {
         const conflicts = response.data.conflicts
           .map((conflict) => `Material: ${conflict.item_name} (ID: ${conflict.material_assign_id})`)
           .join(", ");
-        setError(`Cannot dispatch the following materials as they have already been dispatched: ${conflicts}`);
+        setError(`Cannot dispatch the following materials as they would exceed assigned quantity: ${conflicts}`);
         Swal.fire({
           position: "top-end",
           icon: "error",
-          title: "Some materials have already been dispatched",
+          title: "Some materials would exceed assigned quantity",
           text: conflicts,
           showConfirmButton: false,
           timer: 2000,
@@ -2408,7 +2437,7 @@ const ViewAssignedMaterial = () => {
                         <tr>
                           <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">#</th>
                           <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">Material Details</th>
-                          <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">Quantity & UOM</th>
+                          <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">Remaining Quantity & UOM</th>
                           <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">Component Quantities</th>
                           <th className="px-6 py-4 text-left text-sm font-semibold tracking-wider">Remarks</th>
                         </tr>
@@ -2427,7 +2456,7 @@ const ViewAssignedMaterial = () => {
                               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
                                 <div className="space-y-1">
                                   <span className="inline-flex items-center px-2.5 py-0.5 text-md font-bold">
-                                    {assignment.quantity || "N/A"} | {assignment.uom_name || "N/A"}
+                                    {assignment.remaining_quantity || "N/A"} | {assignment.uom_name || "N/A"}
                                   </span>
                                 </div>
                               </td>
@@ -2569,9 +2598,9 @@ const ViewAssignedMaterial = () => {
                             <p className="text-sm text-gray-600">{assignment.item_name || "N/A"} {getRatioString(assignment)}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-gray-700">Quantity & UOM</p>
+                            <p className="text-sm font-medium text-gray-700">Remaining Quantity & UOM</p>
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800">
-                              {assignment.quantity || "N/A"} {assignment.uom_name || "N/A"}
+                              {assignment.remaining_quantity || "N/A"} {assignment.uom_name || "N/A"}
                             </span>
                           </div>
                           <div>

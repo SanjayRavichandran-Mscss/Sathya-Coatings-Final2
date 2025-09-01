@@ -30,7 +30,7 @@ const ViewCompanies = ({ onUpdate }) => {
     const fetchCompanies = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://103.118.158.33/api/project/companies");
+        const response = await axios.get("http://localhost:5000/project/companies");
         setCompanies(response.data || []);
       } catch (error) {
         console.error("Error fetching companies:", error);
@@ -84,7 +84,7 @@ const ViewCompanies = ({ onUpdate }) => {
     }
 
     try {
-      await axios.put(`http://103.118.158.33/api/project/companies`, {
+      await axios.put(`http://localhost:5000/project/companies`, {
         ...formData,
         location_name: null, // Explicitly send null for location_name
       });
@@ -106,7 +106,7 @@ const ViewCompanies = ({ onUpdate }) => {
         onUpdate(); // Trigger parent to refresh company list
       }
       // Refresh companies list
-      const response = await axios.get("http://103.118.158.33/api/project/companies");
+      const response = await axios.get("http://localhost:5000/project/companies");
       setCompanies(response.data || []);
     } catch (error) {
       console.error("Error updating company:", error);

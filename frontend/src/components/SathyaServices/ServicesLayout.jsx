@@ -24,7 +24,7 @@
 //   const fetchCompanies = async () => {
 //     try {
 //       setLoading(true);
-//       const response = await axios.get("http://103.118.158.33/api/project/companies");
+//       const response = await axios.get("http://localhost:5000/project/companies");
 //       setCompanies(Array.isArray(response.data) ? response.data : []);
 //     } catch (error) {
 //       console.error("Error fetching companies:", error);
@@ -233,7 +233,7 @@ const ServicesLayout = ({ activeMenu, onCompanySelect, selectedCompanyId }) => {
   const fetchCompanies = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://103.118.158.33/api/project/companies");
+      const response = await axios.get("http://localhost:5000/project/companies");
       setCompanies(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.error("Error fetching companies:", error);
