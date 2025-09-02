@@ -8,6 +8,8 @@ import ExpenseEntry from "../../components/SiteIncharge/ExpenseEntry";
 import WorkCompletionEntry from "../../components/SiteIncharge/WorkCompletionEntry";
 import MaterialAcknowledgement from "../../components/SiteIncharge/MaterialAcknowledgement";
 import MaterialUsage from "../../components/SiteIncharge/MaterialUsage";
+import LabourAssign from "../../components/SiteIncharge/LabourAssign";
+import LabourAttendance from "../../components/SiteIncharge/LabourAttendance";
 
 const SiteInchargePage = () => {
   const { encodedUserId } = useParams();
@@ -120,6 +122,8 @@ const SiteInchargePage = () => {
           {activeMenu === "workCompletionEntry" && <WorkCompletionEntry />}
           {activeMenu === "materialAcknowledgement" && <MaterialAcknowledgement />}
           {activeMenu === "materialUsage" && <MaterialUsage />}
+          {activeMenu === "labourAssign" && <LabourAssign />}
+          {activeMenu === "labourAttendance" && <LabourAttendance />}
         </div>
       </div>
 

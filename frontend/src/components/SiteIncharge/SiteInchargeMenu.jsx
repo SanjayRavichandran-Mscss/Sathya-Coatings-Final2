@@ -6,7 +6,9 @@ import {
   User,
   X,
   ClipboardList,
-  PackageCheck
+  PackageCheck,
+  Users,
+  CalendarCheck
 } from "lucide-react";
 
 const SiteInchargeMenu = ({ onMenuSelect, activeMenu }) => {
@@ -37,6 +39,16 @@ const SiteInchargeMenu = ({ onMenuSelect, activeMenu }) => {
       id: "workCompletionEntry",
       label: "Work Completion Entry",
       icon: <ClipboardList size={20} />,
+    },
+    {
+      id: "labourAssign",
+      label: "Labour Assign",
+      icon: <Users size={20} />,
+    },
+    {
+      id: "labourAttendance",
+      label: "Labour Attendance",
+      icon: <CalendarCheck size={20} />,
     },
   ];
 

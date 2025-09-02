@@ -516,12 +516,9 @@ exports.getAcknowledgementDetails = async (req, res) => {
 };
 
 
-
-
-
 exports.saveMaterialUsage = async (req, res) => {
   try {
-    const { material_ack_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks } = req.body;
+    const { material_ack_id, entry_date, overall_qty, remarks, created_by } = req.body;
 
     // Log incoming request body for debugging
     console.log('Request body:', req.body);
@@ -537,7 +534,12 @@ exports.saveMaterialUsage = async (req, res) => {
       return res.status(400).json({ status: 'error', message: 'material_ack_id must be a valid number' });
     }
 
-    // Validate quantities if provided
+    // Validate entry_date
+    if (!entry_date || !/^\d{4}-\d{2}-\d{2}$/.test(entry_date)) {
+      return res.status(400).json({ status: 'error', message: 'entry_date is required in YYYY-MM-DD format' });
+    }
+
+    // Validate overall_qty if provided
     const validateQuantity = (qty, field) => {
       if (qty === null || qty === undefined) return null;
       const parsed = parseInt(qty);
@@ -547,19 +549,11 @@ exports.saveMaterialUsage = async (req, res) => {
       return parsed;
     };
 
-    const validatedCompAQty = validateQuantity(comp_a_qty, 'comp_a_qty');
-    const validatedCompBQty = validateQuantity(comp_b_qty, 'comp_b_qty');
-    const validatedCompCQty = validateQuantity(comp_c_qty, 'comp_c_qty');
+    const validatedOverallQty = validateQuantity(overall_qty, 'overall_qty');
 
     // Validate remarks if provided
-    if (comp_a_remarks && typeof comp_a_remarks !== 'string') {
-      return res.status(400).json({ status: 'error', message: 'comp_a_remarks must be a string' });
-    }
-    if (comp_b_remarks && typeof comp_b_remarks !== 'string') {
-      return res.status(400).json({ status: 'error', message: 'comp_b_remarks must be a string' });
-    }
-    if (comp_c_remarks && typeof comp_c_remarks !== 'string') {
-      return res.status(400).json({ status: 'error', message: 'comp_c_remarks must be a string' });
+    if (remarks && typeof remarks !== 'string') {
+      return res.status(400).json({ status: 'error', message: 'remarks must be a string' });
     }
 
     // Check database connection
@@ -570,56 +564,85 @@ exports.saveMaterialUsage = async (req, res) => {
       return res.status(500).json({ status: 'error', message: 'Database connection failed', error: dbError.message });
     }
 
-    // Check if material_ack_id exists
-    const [ackRecord] = await db.query('SELECT id FROM material_acknowledgement WHERE id = ?', [ackId]);
+    // Check if material_ack_id exists and get acknowledged quantities
+    const [ackRecord] = await db.query('SELECT comp_a_qty, comp_b_qty, comp_c_qty FROM material_acknowledgement WHERE id = ?', [ackId]);
     if (ackRecord.length === 0) {
       return res.status(400).json({ status: 'error', message: `Invalid material_ack_id (${ackId}): record does not exist` });
     }
+    const ack = ackRecord[0];
+    const sumAck = (ack.comp_a_qty || 0) + (ack.comp_b_qty || 0) + (ack.comp_c_qty || 0);
 
-    // Check if usage already exists
-    const [existingUsage] = await db.query('SELECT id FROM material_usage WHERE material_ack_id = ?', [ackId]);
-    if (existingUsage.length > 0) {
-      return res.status(400).json({ status: 'error', message: `Usage already exists for material_ack_id (${ackId})` });
+    // Validate new overall_qty won't exceed acknowledged sum
+    const [currentUsage] = await db.query(
+      `SELECT COALESCE(SUM(overall_qty), 0) AS overall_qty
+       FROM material_usage_history 
+       WHERE material_ack_id = ?`,
+      [ackId]
+    );
+    const currOverall = parseInt(currentUsage[0].overall_qty) || 0;
+
+    if (validatedOverallQty !== null && currOverall + validatedOverallQty > sumAck) {
+      return res.status(400).json({ status: 'error', message: `Overall usage would exceed acknowledged quantity sum (${sumAck})` });
     }
 
-    // Insert into material_usage
-    const [result] = await db.query(
-      `
-        INSERT INTO material_usage
-        (material_ack_id, comp_a_qty, comp_b_qty, comp_c_qty, comp_a_remarks, comp_b_remarks, comp_c_remarks, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-      `,
+    // Insert into material_usage_history
+    await db.query(
+      `INSERT INTO material_usage_history 
+       (material_ack_id, entry_date, overall_qty, remarks, comp_a_qty, comp_b_qty, comp_c_qty, 
+        comp_a_remarks, comp_b_remarks, comp_c_remarks, created_by, created_at)
+       VALUES (?, ?, ?, ?, NULL, NULL, NULL, NULL, NULL, NULL, ?, NOW())`,
       [
         ackId,
-        validatedCompAQty,
-        validatedCompBQty,
-        validatedCompCQty,
-        comp_a_remarks || null,
-        comp_b_remarks || null,
-        comp_c_remarks || null
+        entry_date,
+        validatedOverallQty,
+        remarks || null,
+        created_by ? parseInt(created_by) : null
       ]
     );
 
+    // Update or insert into material_usage
+    const [existingUsage] = await db.query('SELECT id FROM material_usage WHERE material_ack_id = ?', [ackId]);
+
+    if (existingUsage.length === 0) {
+      // Insert new record
+      await db.query(
+        `INSERT INTO material_usage 
+         (material_ack_id, overall_qty, remarks, comp_a_qty, comp_b_qty, comp_c_qty, 
+          comp_a_remarks, comp_b_remarks, comp_c_remarks, created_at, updated_at)
+         VALUES (?, ?, ?, NULL, NULL, NULL, NULL, NULL, NULL, NOW(), NOW())`,
+        [
+          ackId,
+          validatedOverallQty,
+          remarks || null
+        ]
+      );
+    } else {
+      // Update existing record with cumulative quantities
+      await db.query(
+        `UPDATE material_usage 
+         SET 
+           overall_qty = COALESCE(overall_qty, 0) + ?,
+           remarks = ?,
+           updated_at = NOW()
+         WHERE material_ack_id = ?`,
+        [
+          validatedOverallQty || 0,
+          remarks || null,
+          ackId
+        ]
+      );
+    }
+
     res.status(201).json({
       status: 'success',
-      message: 'Material usage saved successfully',
-      data: {
-        id: result.insertId,
-        material_ack_id: ackId,
-        comp_a_qty: validatedCompAQty,
-        comp_b_qty: validatedCompBQty,
-        comp_c_qty: validatedCompCQty,
-        comp_a_remarks: comp_a_remarks || null,
-        comp_b_remarks: comp_b_remarks || null,
-        comp_c_remarks: comp_c_remarks || null
-      }
+      message: 'Material usage saved successfully'
     });
   } catch (error) {
     console.error('Error in saveMaterialUsage:', error);
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(400).json({
         status: 'error',
-        message: 'Usage already exists for this material acknowledgement'
+        message: 'Duplicate entry error'
       });
     }
     if (error.code === 'ER_NO_REFERENCED_ROW_2') {
@@ -635,6 +658,378 @@ exports.saveMaterialUsage = async (req, res) => {
         error: error.message
       });
     }
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+exports.getMaterialUsageDetails = async (req, res) => {
+  try {
+    const { material_ack_id, date } = req.query;
+
+    if (!material_ack_id || isNaN(parseInt(material_ack_id))) {
+      return res.status(400).json({ status: 'error', message: 'material_ack_id is required and must be a number' });
+    }
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({ status: 'error', message: 'date is required in YYYY-MM-DD format' });
+    }
+
+    const ackId = parseInt(material_ack_id);
+
+    // Fetch entries for the specific date
+    const [entries] = await db.query(
+      `SELECT * FROM material_usage_history 
+       WHERE material_ack_id = ? AND entry_date = ? 
+       ORDER BY created_at DESC`,
+      [ackId, date]
+    );
+
+    // Fetch cumulative usage up to the date
+    const [cumulative] = await db.query(
+      `SELECT 
+         COALESCE(SUM(overall_qty), 0) AS overall_qty,
+         COALESCE(SUM(comp_a_qty), 0) AS comp_a_qty,
+         COALESCE(SUM(comp_b_qty), 0) AS comp_b_qty,
+         COALESCE(SUM(comp_c_qty), 0) AS comp_c_qty
+       FROM material_usage_history 
+       WHERE material_ack_id = ? AND entry_date <= ?`,
+      [ackId, date]
+    );
+
+    // Fetch total cumulative usage (all dates)
+    const [totalCumulative] = await db.query(
+      `SELECT 
+         COALESCE(SUM(overall_qty), 0) AS overall_qty,
+         COALESCE(SUM(comp_a_qty), 0) AS comp_a_qty,
+         COALESCE(SUM(comp_b_qty), 0) AS comp_b_qty,
+         COALESCE(SUM(comp_c_qty), 0) AS comp_c_qty
+       FROM material_usage_history 
+       WHERE material_ack_id = ?`,
+      [ackId]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        cumulative: cumulative[0],
+        total_cumulative: totalCumulative[0],
+        entries
+      }
+    });
+  } catch (error) {
+    console.error('Error in getMaterialUsageDetails:', error);
+    res.status(500).json({ status: 'error', message: 'Internal server error', error: error.message });
+  }
+};
+
+
+exports.getWorkDescriptionsBySite = async (req, res) => {
+  try {
+    const { site_id } = req.query;
+    if (!site_id) {
+      return res.status(400).json({ status: 'error', message: 'site_id is required' });
+    }
+
+    const [descIds] = await db.query(
+      `SELECT DISTINCT desc_id 
+       FROM po_reckoner 
+       WHERE site_id = ?`,
+      [site_id]
+    );
+
+    if (descIds.length === 0) {
+      return res.status(200).json({
+        status: 'success',
+        data: []
+      });
+    }
+
+    const descIdList = descIds.map(d => d.desc_id);
+    const [descriptions] = await db.query(
+      `SELECT desc_id, desc_name 
+       FROM work_descriptions 
+       WHERE desc_id IN (?)`,
+      [descIdList]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: descriptions || []
+    });
+  } catch (error) {
+    console.error('Error in getWorkDescriptionsBySite:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+exports.getEmployeesByDesignation = async (req, res) => {
+  try {
+    const designationId = 7; // Fixed designation_id for labour
+    const [employees] = await db.query(
+      `SELECT emp_id, full_name 
+       FROM employee_master 
+       WHERE designation_id = ?`,
+      [designationId]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: employees || []
+    });
+  } catch (error) {
+    console.error('Error in getEmployeesByDesignation:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+
+
+exports.getAssignedLabours = async (req, res) => {
+  try {
+    const { project_id, site_id, desc_id } = req.query;
+
+    if (!project_id || !site_id || !desc_id || isNaN(desc_id)) {
+      return res.status(400).json({ status: 'error', message: 'project_id, site_id, and desc_id are required' });
+    }
+
+    const [labours] = await db.query(
+      `SELECT la.id, la.emp_id, em.full_name 
+       FROM labour_assignment la 
+       JOIN employee_master em ON la.emp_id = em.emp_id 
+       WHERE la.project_id = ? AND la.site_id = ? AND la.desc_id = ?`,
+      [project_id, site_id, desc_id]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: labours || []
+    });
+  } catch (error) {
+    console.error('Error in getAssignedLabours:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+exports.saveLabourAttendance = async (req, res) => {
+  try {
+    const { attendance_data, created_by } = req.body;
+    console.log('Received payload:', req.body); // Debug log
+
+    if (!attendance_data || !Array.isArray(attendance_data) || attendance_data.length === 0) {
+      console.log('Validation failed: attendance_data missing, not an array, or empty');
+      return res.status(400).json({ status: 'error', message: 'attendance_data is required and must be a non-empty array' });
+    }
+    if (!created_by || isNaN(created_by)) {
+      console.log('Validation failed: created_by missing or not a number');
+      return res.status(400).json({ status: 'error', message: 'created_by is required and must be a number' });
+    }
+
+    for (const data of attendance_data) {
+      const { labour_assignment_id, entry_date, shift } = data;
+
+      if (!labour_assignment_id || isNaN(labour_assignment_id)) {
+        console.log('Validation failed: labour_assignment_id missing or not a number');
+        return res.status(400).json({ status: 'error', message: 'labour_assignment_id is required and must be a number for each attendance entry' });
+      }
+      if (!entry_date || !/^\d{4}-\d{2}-\d{2}$/.test(entry_date)) {
+        console.log('Validation failed: entry_date missing or invalid format');
+        return res.status(400).json({ status: 'error', message: 'entry_date is required in YYYY-MM-DD format for each attendance entry' });
+      }
+      if (shift === undefined || isNaN(shift)) {
+        console.log('Validation failed: shift missing or not a number');
+        return res.status(400).json({ status: 'error', message: 'shift is required and must be a number for each attendance entry' });
+      }
+
+      const [assignment] = await db.query('SELECT id FROM labour_assignment WHERE id = ?', [labour_assignment_id]);
+      if (assignment.length === 0) {
+        console.log('Validation failed: Invalid labour_assignment_id', labour_assignment_id);
+        return res.status(400).json({ status: 'error', message: 'Invalid labour_assignment_id' });
+      }
+
+      await db.query(
+        `INSERT INTO labour_attendance 
+         (labour_assignment_id, shift, created_by, created_at, entry_date)
+         VALUES (?, ?, ?, NOW(), ?)`,
+        [labour_assignment_id, shift, created_by, entry_date]
+      );
+    }
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Labour attendance saved successfully'
+    });
+  } catch (error) {
+    console.error('Error in saveLabourAttendance:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Duplicate attendance entry'
+      });
+    }
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid foreign key reference'
+      });
+    }
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+exports.saveLabourAssignment = async (req, res) => {
+  try {
+    const { project_id, site_id, desc_id, emp_ids, from_date, to_date, created_by } = req.body;
+    console.log('Received payload:', req.body); // Debug log
+
+    // Basic input validation
+    if (!project_id) {
+      console.log('Validation failed: project_id missing');
+      return res.status(400).json({ status: 'error', message: 'project_id is required' });
+    }
+    if (!site_id) {
+      console.log('Validation failed: site_id missing');
+      return res.status(400).json({ status: 'error', message: 'site_id is required' });
+    }
+    if (!desc_id || isNaN(desc_id)) {
+      console.log('Validation failed: desc_id missing or not a number');
+      return res.status(400).json({ status: 'error', message: 'desc_id is required and must be a number' });
+    }
+    if (!emp_ids || !Array.isArray(emp_ids) || emp_ids.length === 0) {
+      console.log('Validation failed: emp_ids missing, not an array, or empty');
+      return res.status(400).json({ status: 'error', message: 'emp_ids is required and must be a non-empty array' });
+    }
+    if (!from_date || !/^\d{4}-\d{2}-\d{2}$/.test(from_date)) {
+      console.log('Validation failed: from_date missing or invalid format');
+      return res.status(400).json({ status: 'error', message: 'from_date is required in YYYY-MM-DD format' });
+    }
+    if (!to_date || !/^\d{4}-\d{2}-\d{2}$/.test(to_date)) {
+      console.log('Validation failed: to_date missing or invalid format');
+      return res.status(400).json({ status: 'error', message: 'to_date is required in YYYY-MM-DD format' });
+    }
+    if (!created_by || isNaN(created_by)) {
+      console.log('Validation failed: created_by missing or not a number');
+      return res.status(400).json({ status: 'error', message: 'created_by is required and must be a number' });
+    }
+
+    // Validate date range
+    if (new Date(from_date) > new Date(to_date)) {
+      console.log('Validation failed: from_date later than to_date');
+      return res.status(400).json({ status: 'error', message: 'from_date cannot be later than to_date' });
+    }
+
+    // Check foreign key existence
+    const [project] = await db.query('SELECT pd_id FROM project_details WHERE pd_id = ?', [project_id]);
+    if (project.length === 0) {
+      console.log('Validation failed: Invalid project_id', project_id);
+      return res.status(400).json({ status: 'error', message: 'Invalid project_id' });
+    }
+    const [site] = await db.query('SELECT site_id FROM site_details WHERE site_id = ?', [site_id]);
+    if (site.length === 0) {
+      console.log('Validation failed: Invalid site_id', site_id);
+      return res.status(400).json({ status: 'error', message: 'Invalid site_id' });
+    }
+    const [workDesc] = await db.query('SELECT desc_id FROM work_descriptions WHERE desc_id = ?', [desc_id]);
+    if (workDesc.length === 0) {
+      console.log('Validation failed: Invalid desc_id', desc_id);
+      return res.status(400).json({ status: 'error', message: 'Invalid desc_id' });
+    }
+    const [employees] = await db.query('SELECT emp_id FROM employee_master WHERE emp_id IN (?) AND designation_id = 7', [emp_ids]);
+    if (employees.length !== emp_ids.length) {
+      console.log('Validation failed: Invalid emp_ids', emp_ids);
+      return res.status(400).json({ status: 'error', message: 'One or more emp_ids are invalid or do not have designation_id = 7' });
+    }
+    const [user] = await db.query('SELECT user_id FROM users WHERE user_id = ?', [created_by]);
+    if (user.length === 0) {
+      console.log('Validation failed: Invalid created_by', created_by);
+      return res.status(400).json({ status: 'error', message: 'Invalid created_by user_id' });
+    }
+
+    // Insert a row for each emp_id
+    for (const emp_id of emp_ids) {
+      await db.query(
+        `INSERT INTO labour_assignment 
+         (project_id, site_id, desc_id, emp_id, from_date, to_date, created_by, created_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+        [project_id, site_id, desc_id, emp_id, from_date, to_date, created_by]
+      );
+    }
+
+    res.status(201).json({
+      status: 'success',
+      message: 'Labour assignments saved successfully'
+    });
+  } catch (error) {
+    console.error('Error in saveLabourAssignment:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Duplicate labour assignment'
+      });
+    }
+    if (error.code === 'ER_NO_REFERENCED_ROW_2') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Invalid foreign key reference'
+      });
+    }
+    res.status(500).json({
+      status: 'error',
+      message: 'Internal server error',
+      error: error.message
+    });
+  }
+};
+
+
+
+
+exports.getLabourAttendance = async (req, res) => {
+  try {
+    const { project_id, site_id, desc_id, entry_date } = req.query;
+
+    if (!project_id || !site_id || !desc_id || isNaN(desc_id)) {
+      console.log('Validation failed: Missing or invalid project_id, site_id, or desc_id');
+      return res.status(400).json({ status: 'error', message: 'project_id, site_id, and desc_id are required' });
+    }
+    if (!entry_date || !/^\d{4}-\d{2}-\d{2}$/.test(entry_date)) {
+      console.log('Validation failed: entry_date missing or invalid format');
+      return res.status(400).json({ status: 'error', message: 'entry_date is required in YYYY-MM-DD format' });
+    }
+
+    const [labours] = await db.query(
+      `SELECT la.id, la.emp_id, em.full_name, lat.shift
+       FROM labour_assignment la 
+       JOIN employee_master em ON la.emp_id = em.emp_id 
+       LEFT JOIN labour_attendance lat ON la.id = lat.labour_assignment_id AND lat.entry_date = ?
+       WHERE la.project_id = ? AND la.site_id = ? AND la.desc_id = ?`,
+      [entry_date, project_id, site_id, desc_id]
+    );
+
+    res.status(200).json({
+      status: 'success',
+      data: labours || []
+    });
+  } catch (error) {
+    console.error('Error in getLabourAttendance:', error);
     res.status(500).json({
       status: 'error',
       message: 'Internal server error',

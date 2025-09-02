@@ -7,6 +7,14 @@ router.post("/completion-status", SiteInchargeController.saveCompletionStatus);
 router.get("/completion-entries-by-site/:site_id", SiteInchargeController.getCompletionEntriesBySiteID);
 router.post("/acknowledge-material", SiteInchargeController.saveMaterialAcknowledgement);
 router.get("/acknowledgement-details", SiteInchargeController.getAcknowledgementDetails);
+router.get("/material-usage-details", SiteInchargeController.getMaterialUsageDetails);
 router.post("/save-material-usage", SiteInchargeController.saveMaterialUsage);
+// Routes for labour assignment
+router.get('/employees', SiteInchargeController.getEmployeesByDesignation);
+router.post('/save-labour-assignment', SiteInchargeController.saveLabourAssignment);
+router.get('/work-descriptions', SiteInchargeController.getWorkDescriptionsBySite);
+router.get('/assigned-labours', SiteInchargeController.getAssignedLabours);
+router.post('/save-labour-attendance', SiteInchargeController.saveLabourAttendance);
+router.get('/labour-attendance', SiteInchargeController.getLabourAttendance);
 
 module.exports = router;
